@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.13.3
+- Feat : New /health endpoint for uptime monitoring
+  - GET and HEAD return 200 with `{"status":"ok","timestamp":...,"version":...}` in JSON, with `cache-control: no-store` and no auth
+  - Pure request handler — no database, no external calls, no pageview tracking (it never loads the SPA or its analytics script)
+
 ### 2.13.2
 - Change : Added cookieless analytics tracking (analytics.lv0.eu) to the site
   - Records page views across client-side navigation; no cookies, no consent storage, no fingerprinting, no visitor ids
