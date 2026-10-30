@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.13.2
+- Change : Added cookieless analytics tracking (analytics.lv0.eu) to the site
+  - Records page views across client-side navigation; no cookies, no consent storage, no fingerprinting, no visitor ids
+
 ### 2.13.1
 - Fix : Importing an Excel question file no longer leaves the last question without a correct answer
   - Affected the Import tool and the Audit tool's "compare against Excel source" side, since both share the same Excel parser
