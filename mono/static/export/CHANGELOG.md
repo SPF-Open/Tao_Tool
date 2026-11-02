@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.13.4
+- Fix : Typo in the analytics script tag — `ata-cookies` was missing its "d", silently disabling cookie mode (no visitors/sessions/returning visitors)
+  - The attribute is now correctly `data-cookies="true"`
+
 ### 2.13.3
 - Feat : New /health endpoint for uptime monitoring
   - GET and HEAD return 200 with `{"status":"ok","timestamp":...,"version":...}` in JSON, with `cache-control: no-store` and no auth
