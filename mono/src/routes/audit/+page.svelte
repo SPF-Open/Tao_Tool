@@ -59,6 +59,12 @@
     auditError.set(null);
     try {
       sheets = getExcelSheets(await file.arrayBuffer());
+      // getExcelSheets never throws (it swallows parse failures and returns
+      // an empty list) — treat "no readable sheets" as the failure path so
+      // an unreadable file can't leave a ghost filename badge behind.
+      if (sheets.length === 0) {
+        throw new Error("No readable sheets in this file.");
+      }
       selectedSheet = sheets[0] ?? "";
     } catch (e) {
       pushError("Excel error", e instanceof Error ? e.message : String(e));
