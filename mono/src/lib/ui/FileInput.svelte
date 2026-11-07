@@ -14,8 +14,12 @@
     /** Accessible name of the upload region — pass a distinct one when a
         page renders several FileInputs. */
     label?: string;
+    /** Button text (localized by the page — pages mix EN and FR UIs). */
+    dropLabel?: string;
     /** Format hint shown under the label (e.g. "XLSX or CSV"). */
     hint?: string;
+    /** Pluralization for the "N file(s) selected" line — localized by the page. */
+    countLabel?: (count: number) => string;
     /** Called with the accepted files whenever a valid selection is made. */
     onfiles?: (files: File[]) => void;
     [key: string]: any;
@@ -28,7 +32,9 @@
     disabled = false,
     invalidTitle = "Unsupported file type",
     label = "File upload area",
+    dropLabel = "Click to upload or drag and drop",
     hint = "",
+    countLabel = (count: number) => `${count} file${count !== 1 ? "s" : ""} selected`,
     onfiles = undefined,
     ...rest
   } = $props();
@@ -147,7 +153,7 @@
       disabled={disabled}
     >
       <Upload size={20} />
-      <span>Click to upload or drag and drop</span>
+      <span>{dropLabel}</span>
       {#if hint}
         <span class="file-hint">{hint}</span>
       {/if}
@@ -164,7 +170,7 @@
           onclick={() => (showFiles = !showFiles)}
         >
           <ChevronDown size={14} strokeWidth={2} class="file-chevron {showFiles ? 'open' : ''}" />
-          <span class="file-count">{file.length} file{file.length !== 1 ? 's' : ''} selected</span>
+          <span class="file-count">{countLabel(file.length)}</span>
         </button>
         {#if showFiles}
           <ul transition:slide={{ duration: slideDur }}>

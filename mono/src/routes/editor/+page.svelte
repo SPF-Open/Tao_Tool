@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FileArchive, FileText, Download, CheckCircle2, FilePenLine } from "lucide-svelte";
+  import { FileArchive, FileText, Download, CheckCircle2, FilePenLine, TriangleAlert } from "lucide-svelte";
   import { SvelteMap } from "svelte/reactivity";
   import { EmptyState, SidebarLayout, PageHeader, FileInput, Button } from "$lib/ui";
   import { pushError, pushNotification } from "$lib/ui/notifications";
@@ -25,7 +25,7 @@
   import RawXmlEditor from "$lib/editor/RawXmlEditor.svelte";
 
   const SITE_URL = "https://tao.lv0.eu";
-  const PAGE_TITLE = "Editor — TAO";
+  const PAGE_TITLE = "Éditeur QTI — TAO";
   const PAGE_DESC =
     "Ouvrez un paquet QTI exporté depuis TAO et modifiez le prompt, les réponses, la limite de caractères et les métadonnées de chaque question — en mode simple ou en XML brut — puis exportez un ZIP prêt à réimporter.";
 
@@ -284,11 +284,20 @@
   <meta name="twitter:image" content={`${SITE_URL}/og-image.png`} />
 </svelte:head>
 
-<SidebarLayout sidebarLabel="Editor options">
+<SidebarLayout sidebarLabel="Options de l'éditeur">
   {#snippet sidebar()}
     <div class="panel">
       <h2 class="panel-title">Paquet source</h2>
-      <FileInput accept=".zip" invalidTitle="Fichier non supporté" bind:file={files} onfiles={onFiles} />
+      <FileInput
+        accept=".zip"
+        invalidTitle="Fichier non supporté"
+        label="Paquet source"
+        dropLabel="Cliquez pour choisir un fichier ou déposez-le ici"
+        hint="ZIP exporté depuis TAO"
+        countLabel={(n: number) => (n === 1 ? "1 fichier sélectionné" : `${n} fichiers sélectionnés`)}
+        bind:file={files}
+        onfiles={onFiles}
+      />
 
       {#if sourceFile}
         <div class="file-badge">
@@ -321,7 +330,7 @@
 
         <Button variant="primary" disabled={exporting} onclick={exportZip}>
           <Download size={16} />
-          {exporting ? "Export…" : "Exporter le ZIP"}
+          {exporting ? "Export en cours…" : "Exporter le ZIP"}
         </Button>
 
         {#if result}
@@ -337,8 +346,8 @@
   <main class="main">
     <PageHeader
       icon={FilePenLine}
-      eyebrow="Éditeur QTI"
-      title="Editor"
+      eyebrow="Édition"
+      title="Éditeur QTI"
       subtitle="Modifiez le prompt, les réponses, la limite de caractères et les métadonnées de chaque question, puis exportez un ZIP prêt à réimporter dans TAO."
     />
 
@@ -347,9 +356,30 @@
         icon={FileArchive}
         title="Importez un paquet QTI"
         description="Sélectionnez le .zip exporté depuis TAO. Choisissez ensuite une question dans le panneau latéral pour l'éditer, en mode simple ou en XML brut."
-      />
+        centered
+      >
+        <!-- CTA visible in the main area: on mobile the sidebar is a closed
+           drawer, so the import action must be reachable without it. -->
+        <FileInput
+          accept=".zip"
+          invalidTitle="Fichier non supporté"
+          label="Importer le paquet QTI"
+          dropLabel="Cliquez pour choisir un fichier ou déposez-le ici"
+          hint="ZIP exporté depuis TAO"
+          countLabel={(n: number) => (n === 1 ? "1 fichier sélectionné" : `${n} fichiers sélectionnés`)}
+          bind:file={files}
+          onfiles={onFiles}
+        />
+      </EmptyState>
     {:else if parsing}
       <EmptyState icon={FileArchive} title="Lecture du paquet…" />
+    {:else if !pkg}
+      <EmptyState
+        icon={TriangleAlert}
+        title="Impossible de lire ce paquet"
+        description="Ce fichier n'a pas pu être analysé comme un paquet QTI valide — choisissez un autre .zip exporté depuis TAO."
+        centered
+      />
     {:else if !selectedItem}
       <EmptyState
         icon={FileText}
@@ -451,6 +481,9 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    /* Fill the viewport so an EmptyState marked `centered` can vertically
+       center in the leftover space instead of sticking to the top. */
+    min-height: calc(100vh - var(--layout-header-height) - 3rem);
   }
 
   .panel {
@@ -678,6 +711,22 @@
   @media (max-width: 640px) {
     .main {
       padding: 1rem;
+    }
+
+    /* Touch targets: small text-buttons grow to a comfortable tap size. */
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+    }
+
+    .mode-switch button,
+    .raw-tabs button {
+      min-height: 36px;
+    }
+
+    .question-row {
+      min-height: 40px;
     }
   }
 
