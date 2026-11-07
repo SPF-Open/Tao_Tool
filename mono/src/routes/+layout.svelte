@@ -490,7 +490,8 @@
 		gap: 6px;
 		font-size: 13px;
 		min-width: 0;
-		overflow: hidden;
+		/* Must stay visible: the tool/doc switcher menus are absolutely
+		   positioned inside it and would be clipped by overflow: hidden. */
 	}
 
 	.bc-link,
@@ -560,6 +561,10 @@
 	.bc-muted {
 		color: var(--text-muted);
 		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		flex-shrink: 1;
+		min-width: 0;
 	}
 
 	.header-right {
