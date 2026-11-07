@@ -117,6 +117,52 @@
 	margin: 1.4rem 0 0;
 }
 
+/* Short phones: an even tighter tier so content-dense slides still fit
+   without scrolling (360×640-class viewports). */
+@media (max-width: 720px) and (max-height: 700px) {
+	.deck .slide {
+		padding: 0.6rem;
+	}
+
+	.deck .title {
+		font-size: 1.2rem;
+		padding-bottom: 0.3rem;
+	}
+
+	.deck .message {
+		font-size: 0.82rem;
+		margin-top: 0.5rem;
+	}
+
+	.deck .aside {
+		font-size: 0.72rem;
+		margin-top: 0.6rem;
+	}
+}
+
+/* Phone tier: compress the deck so every slide fits without scrolling. */
+@media (max-width: 720px) {
+	.deck .slide {
+		padding: 0.85rem;
+	}
+
+	.deck .title {
+		font-size: 1.4rem;
+		padding-bottom: 0.4rem;
+	}
+
+	.deck .message {
+		font-size: 0.9rem;
+		line-height: 1.45;
+		margin-top: 0.7rem;
+	}
+
+	.deck .aside {
+		font-size: 0.78rem;
+		margin-top: 0.9rem;
+	}
+}
+
 /* ── Cover / close ─────────────────────────────────────── */
 .deck .brand {
 	display: inline-flex;
@@ -199,6 +245,21 @@
 	margin: 1.6rem 0 0;
 	color: var(--text-muted);
 	font-size: 0.82rem;
+}
+
+.deck .hint .hint-touch {
+	display: none;
+}
+
+/* Touch devices: a keyboard hint is a dead instruction — swap the copy. */
+@media (pointer: coarse) {
+	.deck .hint .hint-keyboard {
+		display: none;
+	}
+
+	.deck .hint .hint-touch {
+		display: inline;
+	}
 }
 
 .deck .hint kbd,

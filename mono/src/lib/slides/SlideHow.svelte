@@ -103,6 +103,37 @@
     }
   }
 
+  /* Phones: stack the flow vertically so arrows never wrap orphans. */
+  @media (max-width: 720px) {
+    .dataflow {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.35rem;
+      margin-top: 1rem;
+    }
+
+    .df-node {
+      padding: 0.5rem 0.7rem;
+      font-size: 0.85rem;
+    }
+
+    .df-arrow-wrap :global(svg) {
+      transform: rotate(90deg);
+    }
+  }
+
+  @media (max-width: 720px) and (max-height: 700px) {
+    .dataflow {
+      gap: 0.25rem;
+      margin-top: 0.7rem;
+    }
+
+    .df-node {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.78rem;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .df-arrow-wrap,
     .df-arrow-wrap :global(svg) {
