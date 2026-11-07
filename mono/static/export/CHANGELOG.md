@@ -120,7 +120,7 @@
 - Feat : Audit gets a "Custom" Excel template
   - Alongside the fixed FIN / OLD_BOSA / OLD_FIN presets, you can now type in your own column letters (title, prompt, answer, competency, indicator, descriptions) and row layout (first data row, answers per question, rows to skip) — the same manual mapping the Import route already offers — so any Excel source can be audited, not just the three known layouts
 
-### 2.9.0
+### 2.8.2
 - Feat : Format is now an interactive question-stem editor
   - Pick any question from an uploaded TAO QTI export and rewrite its stem by hand, with a live preview
   - Lines starting with "•" or "-" are auto-detected as a bulleted list; other line breaks become line breaks
