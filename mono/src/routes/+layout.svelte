@@ -20,7 +20,7 @@
 	import { fly, fade } from "svelte/transition";
 	import { goto } from "$app/navigation";
 	import { sidebarEnabled, sidebarOpen } from "$lib/sidebar";
-	import { docs, stackDocs, getDoc } from "$lib/docs";
+	import { docs, stackDocs, presentationDocs, getDoc } from "$lib/docs";
 	import NotificationQueue from "$lib/ui/NotificationQueue.svelte";
 	import DebugPanel from "$lib/general/DebugPanel.svelte";
 	import Modal from "$lib/ui/Modal.svelte";
@@ -115,7 +115,7 @@
 		bcSegments[0] === "docs" && bcSegments.length === 2 ? bcSegments[1] : null,
 	);
 
-	const allDocs = $derived([...docs, ...stackDocs]);
+	const allDocs = $derived([...docs, ...stackDocs, ...presentationDocs]);
 
 	function switchTool(slug: string) {
 		toolMenuOpen = false;

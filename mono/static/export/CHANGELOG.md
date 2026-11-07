@@ -1,5 +1,22 @@
 ## Changelog
 
+### 2.13.8
+- Fix : Documentation pages — single h1, no duplicated intro, synced `lang` (page template re-audited: 70/68 → 93/91)
+  - Every doc file started with its own `# Title` + intro paragraph, duplicating the page hero (two h1, two nearly identical intros); the lead is now stripped at render, so the hero is the only h1 and the prose starts at the first section
+  - `<html lang>` now follows the selected language (EN/FR/NL) so screen readers switch pronunciation
+  - The breadcrumb doc switcher now includes Slides (it was missing from the doc list)
+  - Fixed a fetch race: fast language switches could let an older response overwrite the newer one (guard on slug AND language)
+  - Loading state is a pulsing skeleton and fetch failures get a Retry button
+
+### 2.13.7
+- Feat : Changelog — version index, back-to-top, unique anchors (page re-audited: 91/90, follow-ups cleared)
+  - Sticky "Versions" index in a right column on desktop (62 anchor links built from the markdown heading ids), hidden on mobile
+  - Floating back-to-top button after 600px of scroll
+  - The markdown's own "## Changelog" heading is stripped — the page header is the only title (a visually hidden h2 keeps the heading outline clean)
+  - Version headings restyled (monospace, stronger rhythm) with a "latest" badge on the most recent release
+  - Source fix: the duplicated "### 2.9.0" entry renamed to 2.8.2 — unique anchors, monotonic version order
+  - Loading skeleton (aria-busy) and a Retry button on fetch failure
+
 ### 2.13.6
 - Fix : Forge — the calendar edit menu now actually opens, and the grid fits the screen on mobile (page re-audited: 62/55 → 85/84)
   - The day edit menu (colors + note) never rendered when clicking a day — pre-existing Svelte 5 reactivity bug (mutating items of the calendar array did not retrigger the render); the array is now rebuilt with fresh objects on every click
