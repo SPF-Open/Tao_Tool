@@ -1,5 +1,12 @@
 ## Changelog
 
+### 2.13.21
+- Improve : tool/doc switcher menu redesigned — icon tiles, subtitles, mobile sheet grid, listbox keyboard contract
+  - Each entry now shows an icon tile (the homepage route-card recipe) and the tool eyebrow as a second line ("Import — Excel to TAO"); the active tool gets a brand tint and a check mark
+  - Phones (≤640px): the dropdown becomes a near-fullwidth sheet under the header with a 2-column tile grid — no more overflow on narrow screens (verified at 393px and 360px)
+  - Keyboard contract: focus moves to the active option on open, ArrowUp/Down/Home/End rove between options, Escape closes and returns focus to the chip; the chip now toggles cleanly instead of close-then-reopen
+  - Honors prefers-reduced-motion (the guard previously sat before the animated rule in the cascade and never applied)
+
 ### 2.13.20
 - Fix : Forge — calendar fits mid-size viewports, options bar stacks on phones
   - The 7-column calendar grid becomes fluid under 960px instead of overflowing with a silent horizontal scroll (real-device report at 50% page zoom); compact cells with 44px day targets
