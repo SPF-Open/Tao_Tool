@@ -35,7 +35,7 @@
         Lines starting with "•" or "-" become a bulleted list. Other line
         breaks become line breaks.
       </p>
-      <textarea class="editor" {value} oninput={handleInput} rows="14"></textarea>
+      <textarea class="editor" {value} oninput={handleInput} rows="14" aria-label="Stem text"></textarea>
     </div>
     <div class="pane">
       <span class="pane-label">Preview</span>
