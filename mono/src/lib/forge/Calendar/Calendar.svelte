@@ -301,9 +301,9 @@
     color: var(--text);
   }
 
-  /* Phones: the fixed-size cells overflowed the viewport with no scroll hint
-     — the grid becomes fluid and fills the screen instead. */
-  @media (max-width: 640px) {
+  /* Phones & small tablets: the fixed-size cells (7 × 8rem = 896px) overflow
+     any viewport under ~960px — the grid becomes fluid and fills the screen. */
+  @media (max-width: 960px) {
     .grid {
       width: 100%;
     }
@@ -313,14 +313,6 @@
     .cell.lg {
       width: auto;
       min-width: 0;
-    }
-
-    .weekday {
-      font-size: 0.55rem;
-      letter-spacing: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      padding: 0.3rem 0;
     }
 
     .day {
@@ -334,6 +326,16 @@
 
     .innerCell span {
       font-size: 0.78rem;
+    }
+
+    /* With the sidebar open the grid can drop to ~55px per column — labels
+       shrink and clip instead of pushing the cells apart. */
+    .weekday {
+      font-size: 0.6rem;
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      padding: 0.3rem 0;
     }
   }
 

@@ -65,6 +65,29 @@
     width: 11rem;
     flex: none;
   }
+
+  /* Phones & small tablets: stack the controls into a tidy column instead of
+     a scattered centered wrap. */
+  @media (max-width: 720px) {
+    .options {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .options :global(>*) {
+      justify-content: space-between;
+    }
+
+    .options :global(nav) {
+      gap: 0.5rem;
+    }
+
+    .options :global(nav > *) {
+      flex: 1;
+      justify-content: center;
+    }
+  }
   .content {
     position: relative;
     margin: 1rem auto;
@@ -72,9 +95,10 @@
     padding: 2rem;
   }
 
-  /* Phones: stop the content box from sizing to a wide child (e.g. the
-     calendar grid) — fill the viewport instead and let the child scroll. */
-  @media (max-width: 640px) {
+  /* Phones & small tablets: stop the content box from sizing to a wide child
+     (e.g. the calendar grid) — fill the viewport instead and let the child
+     adapt. Same band as the calendar's fluid-grid breakpoint. */
+  @media (max-width: 960px) {
     .content {
       width: auto;
       max-width: 100%;
