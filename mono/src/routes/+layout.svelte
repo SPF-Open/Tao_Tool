@@ -180,7 +180,11 @@
 			<a href="/" class="bc-link">tao</a>
 			{#each bcSegments as seg, i}
 				<span class="bc-sep" aria-hidden="true">/</span>
-				{#if i === bcSegments.length - 1 && currentToolSlug}
+				{#if page.error}
+					<!-- On an error page the deeper segments did not resolve —
+					   render them as plain text instead of links to more 404s. -->
+					<span class="bc-muted">{seg}</span>
+				{:else if i === bcSegments.length - 1 && currentToolSlug}
 					<div class="tool-switcher">
 						<button type="button"
 							class="bc-tool-btn"
@@ -551,6 +555,11 @@
 	.bc-current {
 		color: var(--text);
 		font-weight: 600;
+	}
+
+	.bc-muted {
+		color: var(--text-muted);
+		white-space: nowrap;
 	}
 
 	.header-right {
