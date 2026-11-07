@@ -157,7 +157,11 @@
 </script>
 
 <div class="settings-panel">
-  <Tables />
+  <!-- The zeroed stat card means nothing before a package is loaded —
+     same gating as the Question Filtering section below. -->
+  {#if $activeItems.length > 0}
+    <Tables />
+  {/if}
   <!-- General Section -->
   <div class="settings-section">
     <button type="button"
