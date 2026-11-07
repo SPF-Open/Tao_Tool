@@ -6,6 +6,8 @@
     type?: "button" | "submit" | "reset";
     /** Native tooltip — commonly used to explain a disabled button. */
     title?: string;
+    /** Extra classes appended to the .btn base class. */
+    class?: string;
     children?: import('svelte').Snippet;
   }
 
@@ -15,13 +17,14 @@
     onclick = undefined,
     type = "button",
     title = undefined,
+    class: className = "",
     children,
   }: Props = $props();
 </script>
 
 <button
   {type}
-  class="btn variant-{variant}"
+  class="btn variant-{variant} {className}"
   onclick={onclick}
   disabled={disabled}
   {title}

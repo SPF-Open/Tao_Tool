@@ -3,6 +3,7 @@
   import { ScanSearch, FileArchive, FileSpreadsheet, Play, RotateCcw, X, TriangleAlert } from "lucide-svelte";
   import { PageHeader, EmptyState, SidebarLayout, FileInput, Combobox, Button } from "$lib/ui";
   import { pushError } from "$lib/ui/notifications";
+  import { sidebarOpen } from "$lib/sidebar";
   import { QtiAdapter } from "$lib/questions/adapters/qti.js";
   import { runAudit } from "$lib/audit/index";
   import { getExcelSheets } from "$lib/audit/excel-parser";
@@ -61,6 +62,10 @@
       selectedSheet = sheets[0] ?? "";
     } catch (e) {
       pushError("Excel error", e instanceof Error ? e.message : String(e));
+      // Drop the dangling badge: the filename used to stay visible while the
+      // file had actually failed to parse.
+      auditFilename.set("");
+      excelFile = null;
       sheets = [];
       selectedSheet = "";
     }
@@ -130,7 +135,7 @@
           <button type="button" class="badge-clear" onclick={clearZip} aria-label="Remove ZIP"><X size={13} /></button>
         </div>
       {:else}
-        <FileInput accept=".zip" invalidTitle="Unsupported file" onfiles={handleZip} />
+        <FileInput accept=".zip" invalidTitle="Unsupported file" hint="ZIP" label="TAO export (.zip)" onfiles={handleZip} />
       {/if}
     </div>
 
@@ -141,7 +146,7 @@
           <span class="badge-name" title={$auditFilename}>{$auditFilename}</span>
         </div>
       {/if}
-      <FileInput accept=".xlsx,.xls" invalidTitle="Unsupported file" onfiles={handleExcel} />
+      <FileInput accept=".xlsx,.xls" invalidTitle="Unsupported file" hint="XLSX or XLS" label="Excel source" onfiles={handleExcel} />
       {#if sheetChoices.length > 0}
         <Combobox legend="Sheet" bind:value={selectedSheet} choices={sheetChoices} />
       {/if}
@@ -152,7 +157,7 @@
     {/if}
 
     <div class="actions">
-      <Button variant="primary" disabled={!ready || $auditLoading} onclick={run}>
+      <Button variant="primary" disabled={!ready || $auditLoading} onclick={run} title={ready ? "Run the audit" : "Load a ZIP and an Excel file, then pick a sheet"}>
         <Play size={16} strokeWidth={2} /> {$auditLoading ? "Running…" : "Run audit"}
       </Button>
       {#if $auditZipName || $auditFilename || $auditReport}
@@ -177,11 +182,22 @@
   {:else if $auditLoading}
     <div class="loading"><span class="spinner" aria-hidden="true"></span> Running audit…</div>
   {:else}
-    <EmptyState
-      icon={ScanSearch}
-      title="Audit a TAO export"
-      description="Upload a TAO .zip export and an Excel source on the left, then run the audit to compare them and surface critical, major and minor differences."
-    />
+    <div class="fill">
+      <EmptyState
+        icon={FileArchive}
+        title="Audit a TAO export"
+        description="Upload a TAO .zip export and an Excel source in the side panel, then run the audit to compare them and surface critical, major and minor differences."
+        centered
+      >
+        {#snippet children()}
+          <!-- On mobile the side panel is a closed drawer; give the empty
+             state a one-tap way to reach the inputs. Desktop hides it. -->
+          <Button variant="secondary" class="open-panel" onclick={() => sidebarOpen.set(true)}>
+            Open the side panel
+          </Button>
+        {/snippet}
+      </EmptyState>
+    </div>
   {/if}
 </SidebarLayout>
 
@@ -215,6 +231,27 @@
     border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--border));
     background: color-mix(in srgb, var(--danger) 7%, var(--surface-elevated));
     border-radius: var(--radius-lg); color: var(--danger); font-size: 0.85rem;
+  }
+
+  /* Give the empty state the remaining viewport height so its `centered`
+     mode actually centers (the PageHeader above stays at the top). */
+  .fill {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: calc(100vh - var(--layout-header-height) - 11rem);
+  }
+
+  /* The drawer-opener CTA only makes sense where the sidebar is a closed
+     drawer. The class lands on a Button child element, hence :global. */
+  .fill :global(.open-panel) {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .fill :global(.open-panel) {
+      display: inline-flex;
+    }
   }
 
   .loading { display: flex; align-items: center; gap: 0.6rem; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; }
