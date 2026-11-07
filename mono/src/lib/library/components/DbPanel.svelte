@@ -3,7 +3,7 @@
     Database, FolderOpen, Plus, Download, HardDriveDownload, TriangleAlert,
     Lock, LockOpen, ShieldCheck,
   } from "lucide-svelte";
-  import { Button, Card, TextInput } from "$lib/ui";
+  import { Button, Card, EmptyState, TextInput } from "$lib/ui";
   import {
     dbInfo, busy, createDb, openDb, exportDb,
     dbHasPassword, setDbPassword, removeDbPassword,
@@ -41,6 +41,7 @@
   let pendingFile = $state<File | null>(null);
   let unlockPw = $state("");
   let unlockError = $state("");
+  let openInput: HTMLInputElement;
 
   async function pickFile(file: File) {
     unlockError = "";
@@ -65,7 +66,10 @@
 <div class="db-panel">
   <Card status={$dbInfo ? "success" : "info"}>
     {#snippet title()}
-      <span class="ct"><Database size={18} strokeWidth={1.75} /> Database</span>
+      <!-- No card title on the empty screen: the page h1 already says "Database". -->
+      {#if $dbInfo}
+        <span class="ct"><Database size={18} strokeWidth={1.75} /> Library file</span>
+      {/if}
     {/snippet}
 
     {#if $dbInfo}
@@ -117,7 +121,11 @@
         <p class="sec-note">Encryption protects the exported <code>.taodb</code> file. The in-browser working copy is not encrypted.</p>
       </div>
     {:else}
-      <p class="hint">Create a new question library or open an existing <code>.taodb</code> file to begin.</p>
+      <EmptyState
+        icon={Database}
+        title="No library open"
+        description="Create a new question library or open an existing .taodb file to begin. It stays in your browser — the actions below handle the rest."
+      />
     {/if}
 
     {#if pendingFile}
@@ -138,14 +146,25 @@
           <Plus size={16} strokeWidth={2} /> New library
         </Button>
 
-        <label class="open-btn" class:disabled={$busy}>
+        <!-- A real button (not a label wrapping a hidden input) so keyboard
+             users can reach the file picker — the input itself is visually
+             hidden but focusable via the button's click(). -->
+        <button type="button" class="open-btn" disabled={$busy} onclick={() => openInput?.click()}>
           <FolderOpen size={16} strokeWidth={1.75} /> Open…
-          <input type="file" accept=".taodb,.sqlite,.db,.sqlite3" disabled={$busy}
-            onchange={(e) => {
-              const t = e.currentTarget;
-              if (t.files?.length) { void pickFile(t.files[0]); t.value = ""; }
-            }} />
-        </label>
+        </button>
+        <input
+          bind:this={openInput}
+          type="file"
+          accept=".taodb,.sqlite,.db,.sqlite3"
+          class="sr-input"
+          tabindex="-1"
+          aria-hidden="true"
+          disabled={$busy}
+          onchange={(e) => {
+            const t = e.currentTarget;
+            if (t.files?.length) { void pickFile(t.files[0]); t.value = ""; }
+          }}
+        />
 
         <Button variant="secondary" disabled={$busy || !$dbInfo} onclick={() => exportDb()}>
           <Download size={16} strokeWidth={1.75} /> Export {#if $dbHasPassword}<Lock size={13} strokeWidth={1.9} />{/if}
@@ -172,8 +191,7 @@
   dt { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
   dd { margin: 0; font-size: 0.9rem; font-weight: 600; color: var(--text); }
   .mono { font-family: ui-monospace, monospace; font-weight: 500; word-break: break-all; }
-  .hint, .aside { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
-  .aside { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .aside { margin: 0; color: var(--text-muted); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; }
   .warn {
     display: flex; align-items: center; gap: 0.4rem;
     margin: 0.75rem 0 0; padding: 0.6rem 0.75rem;
@@ -187,13 +205,23 @@
     display: inline-flex; align-items: center; gap: 8px;
     padding: 8px 16px; border-radius: var(--radius);
     border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    font-family: var(--font-family);
     font-size: var(--font-size-base); font-weight: 500; cursor: pointer;
     transition: background-color 200ms ease, border-color 200ms ease;
   }
-  .open-btn:hover:not(.disabled) { background: var(--border); box-shadow: var(--shadow-sm); }
-  .open-btn.disabled { opacity: 0.5; cursor: not-allowed; }
-  .open-btn input { display: none; }
-  .open-btn:focus-within { outline: none; box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.18); }
+  .open-btn:hover:not(:disabled) { background: var(--border); box-shadow: var(--shadow-sm); }
+  .open-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .open-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.18); }
+
+  /* Visually hidden file input — driven by the Open… button. */
+  .sr-input {
+    position: absolute; width: 1px; height: 1px;
+    opacity: 0; overflow: hidden; clip: rect(0 0 0 0);
+  }
+
+  @media (max-width: 640px) {
+    .open-btn { min-height: 44px; }
+  }
 
   /* Security / password */
   .security {
