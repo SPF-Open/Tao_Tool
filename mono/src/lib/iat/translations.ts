@@ -1,8 +1,17 @@
 const translations = {
   en: {
-    "homepage.title": "Hello, World!",
-    "homepage.welcome": "Hi <strong>{{name}}</strong>, how are you?",
-    "homepage.time": "The current time is: {{time}}",
+    // Page chrome
+    "page.eyebrow": "Analysis",
+    "page.subtitle":
+      "Interactive Assessment Tool — review item difficulty, discrimination and alternative statistics.",
+    "page.empty.title": "Load an IAT statistics workbook",
+    "page.empty.desc":
+      "Upload the Excel export (Speed_Pages / Questions / Alternatives sheets) to analyse item statistics.",
+    "header.title": "IAT Analysis",
+    "header.legend": "Language",
+    "upload.dropLabel": "Click to upload or drag and drop",
+    "upload.hint": "XLSX workbook",
+    "upload.rejectTitle": "Unsupported file type",
     // Table translations
     "table.button.showColumnMenu": "Show Column Menu",
     "table.button.hideColumnMenu": "Hide Column Menu",
@@ -40,9 +49,18 @@ const translations = {
     "table.modal.action.other": "Other",
   },
   fr: {
-    "homepage.title": "Bonjour, monde!",
-    "homepage.welcome": "Salut <strong>{{name}}</strong>, comment ça va?",
-    "homepage.time": "L'heure actuelle est : {{time}}",
+    // Page chrome
+    "page.eyebrow": "Analyse",
+    "page.subtitle":
+      "Interactive Assessment Tool — examinez la difficulté, la discrimination et les statistiques alternatives des items.",
+    "page.empty.title": "Chargez un classeur de statistiques IAT",
+    "page.empty.desc":
+      "Chargez l'export Excel (onglets Speed_Pages / Questions / Alternatives) pour analyser les statistiques des items.",
+    "header.title": "Analyse IAT",
+    "header.legend": "Langue",
+    "upload.dropLabel": "Cliquez pour choisir un fichier ou déposez-le ici",
+    "upload.hint": "Classeur XLSX",
+    "upload.rejectTitle": "Type de fichier non supporté",
     // Table translations
     "table.button.showColumnMenu": "Afficher le menu des colonnes",
     "table.button.hideColumnMenu": "Masquer le menu des colonnes",
@@ -80,9 +98,18 @@ const translations = {
     "table.modal.action.other": "Autre",
   },
   nl: {
-    "homepage.title": "Hallo, wereld!",
-    "homepage.welcome": "Hoi <strong>{{name}}</strong>, hoe gaat het?",
-    "homepage.time": "De huidige tijd is: {{time}}",
+    // Page chrome
+    "page.eyebrow": "Analyse",
+    "page.subtitle":
+      "Interactive Assessment Tool — bekijk itemmoeilijkheid, discriminatie en alternatieve statistieken.",
+    "page.empty.title": "Laad een IAT-statistiekenwerkboek",
+    "page.empty.desc":
+      "Upload de Excel-export (tabbladen Speed_Pages / Questions / Alternatives) om itemstatistieken te analyseren.",
+    "header.title": "IAT-analyse",
+    "header.legend": "Taal",
+    "upload.dropLabel": "Klik om te uploaden of sleep het bestand hierheen",
+    "upload.hint": "XLSX-werkboek",
+    "upload.rejectTitle": "Niet-ondersteund bestandstype",
     // Table translations
     "table.button.showColumnMenu": "Toon kolommenmenu",
     "table.button.hideColumnMenu": "Verberg kolommenmenu",
