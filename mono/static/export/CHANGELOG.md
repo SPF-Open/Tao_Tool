@@ -1,5 +1,14 @@
 ## Changelog
 
+### 2.13.5
+- Improve : UI foundation pass — shared shell + design-system fixes across every page (from the full UI audit)
+  - Markdown rendering: the `prose` class renamed `md-prose` escapes Tailwind Typography's defaults — no more literal backticks in code chips, column centered at 70ch, body text raised to 15.4px, stable heading ids for anchors (numeric suffix on duplicates)
+  - Shell: the sidebar burger no longer renders on pages without a sidebar; Escape closes the breadcrumb/About menus and the mobile drawer; main content is inert while the mobile drawer is open; Docs/Changelog links get an active state and accessible names; the breadcrumb truncates instead of overflowing (fixes the 2px horizontal scroll at 390px)
+  - Touch targets: invisible hit-area extensions on all topbar buttons (≥32px desktop, ≥40px on phones), tool-switcher button raised 22→26px (32px on mobile), Debug button hidden on phones
+  - Components: EmptyState gains `headingLevel` and `centered`; FileInput gains `label`/`hint`, a stronger rest border and drag-over feedback; Switch gains `label` and a 44×30 tap target; Combobox gains `placeholder` and drops its double border; PageHeader subtitle capped at 60ch
+  - DotCanvas: renders on demand instead of a permanent 60fps loop, sharp on HiDPI (devicePixelRatio), redraws on theme toggle, reduced-motion tracked live
+  - Inter is self-hosted (variable woff2, latin subset) — no more Google Fonts request; duplicate `--header-height` token removed
+
 ### 2.13.4
 - Fix : Typo in the analytics script tag — `ata-cookies` was missing its "d", silently disabling cookie mode (no visitors/sessions/returning visitors)
   - The attribute is now correctly `data-cookies="true"`

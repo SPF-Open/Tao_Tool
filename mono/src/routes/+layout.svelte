@@ -138,20 +138,37 @@
 			sidebarOpen.set(window.innerWidth > 640);
 		}
 	});
+
+	// One Escape handler closes any transient surface: breadcrumb menus, the
+	// About menu, and the sidebar drawer (no other close affordance exists
+	// for keyboard users on mobile).
+	$effect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key !== "Escape") return;
+			toolMenuOpen = false;
+			docMenuOpen = false;
+			showAbout = false;
+			if ($sidebarEnabled && $sidebarOpen) {
+				sidebarOpen.set(false);
+			}
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+	});
 </script>
 
 <header class="layout-header hide-print">
 	<div class="header-left">
-		<button type="button"
-			class="burger"
-			onclick={() => sidebarOpen.update((v) => !v)}
-			aria-label={$sidebarEnabled && $sidebarOpen
-				? "Close sidebar"
-				: "Open sidebar"}
-			title="Toggle sidebar"
-		>
-			<Menu size={15} />
-		</button>
+		{#if $sidebarEnabled}
+			<button type="button"
+				class="burger"
+				onclick={() => sidebarOpen.update((v) => !v)}
+				aria-label={$sidebarOpen ? "Close sidebar" : "Open sidebar"}
+				title="Toggle sidebar"
+			>
+				<Menu size={15} />
+			</button>
+		{/if}
 		<nav class="breadcrumb" aria-label="Breadcrumb">
 			<a
 				href="https://lv0.eu"
@@ -245,16 +262,28 @@
 		</nav>
 	</div>
 	<div class="header-right">
-		<a class="nav-link" href={docsHref} title="Documentation">
+		<a
+			class="nav-link"
+			class:active={docsHref === page.url.pathname}
+			href={docsHref}
+			aria-label="Docs"
+			title="Documentation"
+		>
 			<BookOpen size={15} />
 			<span class="nav-link-text">Docs</span>
 		</a>
-		<a class="nav-link" href="/changelog" title="Changelog">
+		<a
+			class="nav-link"
+			class:active={page.url.pathname === "/changelog"}
+			href="/changelog"
+			aria-label="Changelog"
+			title="Changelog"
+		>
 			<ScrollText size={15} />
 			<span class="nav-link-text">Changelog</span>
 		</a>
 		<button type="button"
-			class="icon-btn"
+			class="icon-btn debug-toggle"
 			onclick={() => (debugOpen = !debugOpen)}
 			aria-label="Debug"
 			aria-pressed={debugOpen}
@@ -267,6 +296,7 @@
 				class="icon-btn"
 				onclick={() => (showAbout = !showAbout)}
 				aria-label="About"
+				aria-expanded={showAbout}
 				title="About"
 			>
 				<Info size={15} />
@@ -409,6 +439,23 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
+		min-width: 0;
+	}
+
+	/* Invisible hit-area extension: keeps the compact visual size but gives
+	   touch users a ≥32px target (≥40px on phones, see media query below). */
+	.burger,
+	.icon-btn,
+	.nav-link {
+		position: relative;
+	}
+
+	.burger::after,
+	.icon-btn::after,
+	.nav-link::after {
+		content: "";
+		position: absolute;
+		inset: -3px;
 	}
 
 	.burger {
@@ -439,12 +486,18 @@
 		gap: 6px;
 		font-size: 13px;
 		min-width: 0;
-		overflow: visible;
+		overflow: hidden;
 	}
 
 	.bc-link,
 	.bc-current {
 		white-space: nowrap;
+	}
+
+	.bc-current {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		flex-shrink: 1;
 	}
 
 	.sidebar-backdrop {
@@ -531,6 +584,11 @@
 		background: var(--surface);
 		color: var(--text);
 		text-decoration: none;
+	}
+
+	.nav-link.active {
+		color: var(--brand);
+		font-weight: 600;
 	}
 
 	.icon-btn {
@@ -669,6 +727,14 @@
 			padding: 0;
 			justify-content: center;
 		}
+		.bc-tool-btn {
+			height: 32px;
+			padding: 0 10px;
+		}
+		/* Developer tool — hidden on phones to keep the topbar dense-free. */
+		.debug-toggle {
+			display: none;
+		}
 		.debug-drawer {
 			width: 100vw;
 		}
@@ -690,13 +756,14 @@
 	/* ── Tool switcher ───────────────────────────────────── */
 	.tool-switcher {
 		position: relative;
+		min-width: 0;
 	}
 
 	.bc-tool-btn {
 		display: inline-flex;
 		align-items: center;
 		gap: 3px;
-		padding: 0 3px;
+		padding: 0 6px;
 		border: none;
 		background: transparent;
 		color: var(--text);
@@ -709,7 +776,14 @@
 			background 0.15s,
 			color 0.15s;
 		line-height: 1;
-		height: 22px;
+		height: 26px;
+		min-width: 0;
+	}
+
+	.bc-tool-btn > span {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.bc-tool-btn:hover {

@@ -10,9 +10,12 @@
     choices?: Choice[];
     value?: string | boolean | number;
     disabled?: boolean;
+    /** Shown as a disabled placeholder option when nothing is selected yet
+        (e.g. "Select a file first" before any file is loaded). */
+    placeholder?: string;
   }
 
-  let { legend = "", choices = [], value = $bindable(), disabled = false }: Props = $props();
+  let { legend = "", choices = [], value = $bindable(), disabled = false, placeholder = "" }: Props = $props();
 </script>
 
 <fieldset class:combobox={legend}>
@@ -20,6 +23,9 @@
     <legend class="combobox-legend">{legend}</legend>
   {/if}
   <select class="combobox-select" bind:value {disabled}>
+    {#if placeholder}
+      <option value="" disabled hidden>{placeholder}</option>
+    {/if}
     {#each choices as choice}
       <option value={choice.value} disabled={choice.disabled}>{choice.label}</option>
     {/each}
@@ -57,6 +63,15 @@
     line-height: var(--line-height);
     cursor: pointer;
     transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  /* With a legend, the fieldset carries the single border — the inner select
+     loses its own to avoid a "box in a box". */
+  .combobox .combobox-select {
+    border: none;
+    background-color: transparent;
+    padding-left: 2px;
+    padding-right: 2px;
   }
 
   .combobox-select:focus {

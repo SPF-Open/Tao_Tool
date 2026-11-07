@@ -117,6 +117,7 @@
 
   .ph-subtitle {
     margin: 0.3rem 0 0;
+    max-width: 60ch;
     font-size: 0.9rem;
     line-height: 1.5;
     color: var(--text-muted);

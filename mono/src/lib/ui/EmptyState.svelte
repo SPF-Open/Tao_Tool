@@ -6,22 +6,36 @@
     description?: string;
     /** A lucide-svelte icon component rendered in the brand tile. */
     icon?: ComponentType;
+    /** Heading level for the title — use `h1` when the empty state is the
+        page's top heading (most empty tool screens), `h2` when a PageHeader
+        already provides the h1. */
+    headingLevel?: 'h1' | 'h2';
+    /** Grow and center vertically in the remaining space, for empty screens
+        that would otherwise leave a large blank area below the content. */
+    centered?: boolean;
     /** Optional CTA / dropzone content. */
     children?: import('svelte').Snippet;
   }
 
-  let { title, description = '', icon, children }: Props = $props();
+  let {
+    title,
+    description = '',
+    icon,
+    headingLevel = 'h2',
+    centered = false,
+    children
+  }: Props = $props();
   const Icon = $derived(icon);
 </script>
 
-<div class="empty-state">
+<div class="empty-state" class:centered>
   <span class="es-halo" aria-hidden="true"></span>
   {#if Icon}
     <span class="es-icon" aria-hidden="true">
       <Icon size={26} strokeWidth={1.5} />
     </span>
   {/if}
-  <h2 class="es-title">{title}</h2>
+  <svelte:element this={headingLevel} class="es-title">{title}</svelte:element>
   {#if description}
     <p class="es-description">{description}</p>
   {/if}
@@ -42,6 +56,13 @@
     gap: 0.5rem;
     padding: 2rem 1rem;
     animation: es-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Works inside a flex-column parent: grows to fill the leftover height and
+     centers the content, instead of leaving it stuck to the top. */
+  .empty-state.centered {
+    flex: 1 1 auto;
+    justify-content: center;
   }
 
   .es-halo {
