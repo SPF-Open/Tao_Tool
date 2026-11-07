@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { writable } from "svelte/store";
   import { Hammer } from "lucide-svelte";
   import Calendar from "$lib/forge/Calendar/Calendar.svelte";
   import { Language, lang } from "$lib/forge/store";
-  import { Combobox, PageHeader, SidebarLayout } from "$lib/ui";
+  import { Button, Combobox, PageHeader, SidebarLayout } from "$lib/ui";
+
+  // Owned here so the header action can drive the calendar.
+  let date = writable(new Date());
+  let dateString = writable("");
 </script>
 
 <svelte:head>
@@ -12,9 +17,8 @@
 
 <SidebarLayout sidebarLabel="Forge settings">
   {#snippet sidebar()}
-    <p class="sidebar-label">Language</p>
     <Combobox
-      legend="Language"
+      legend="Calendar language"
       choices={[
         { label: "FR", value: Language.FR },
         { label: "NL", value: Language.NL },
@@ -29,18 +33,11 @@
     eyebrow="Compose"
     title="Forge"
     subtitle="Create and schedule exams from scratch or from existing templates."
-  />
+  >
+    {#snippet actions()}
+      <Button variant="secondary" onclick={() => date.set(new Date())}>Jump to today</Button>
+    {/snippet}
+  </PageHeader>
 
-  <Calendar />
+  <Calendar {date} {dateString} />
 </SidebarLayout>
-
-<style>
-  .sidebar-label {
-    margin: 0 0 4px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-</style>

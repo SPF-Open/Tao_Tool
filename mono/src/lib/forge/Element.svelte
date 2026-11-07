@@ -17,8 +17,6 @@
   </div>
   <hr>
   <div class="content">
-    <div class="lefttop corner"></div>
-    <div class="rightbottom corner"></div>
     {@render children?.()}
   </div>
 </div>
@@ -35,8 +33,12 @@
   }
   h2 {
     text-align: center;
-    color: var(--text);
-    margin: 0.25rem 0;
+    margin: 0.4rem 0 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
   hr {
     border: none;
@@ -57,6 +59,12 @@
     align-items: center;
     gap: 0.25rem;
   }
+  /* The date picker used to stretch across the whole options bar — keep it
+     compact and consistent with the other controls. */
+  .options :global(input[type="date"]) {
+    width: 11rem;
+    flex: none;
+  }
   .content {
     position: relative;
     margin: 1rem auto;
@@ -72,24 +80,5 @@
       max-width: 100%;
       padding: 1rem;
     }
-  }
-
-  .corner {
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid var(--border-strong);
-    border-right: none;
-    border-bottom: none;
-    position: absolute;
-  }
-  .lefttop {
-    top: 0.5rem;
-    left: 0.5rem;
-  }
-
-  .rightbottom {
-    bottom: 0.5rem;
-    right: 0.5rem;
-    rotate: 180deg;
   }
 </style>

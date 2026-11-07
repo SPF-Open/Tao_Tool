@@ -1,5 +1,15 @@
 ## Changelog
 
+### 2.13.6
+- Fix : Forge — the calendar edit menu now actually opens, and the grid fits the screen on mobile (page re-audited: 62/55 → 85/84)
+  - The day edit menu (colors + note) never rendered when clicking a day — pre-existing Svelte 5 reactivity bug (mutating items of the calendar array did not retrigger the render); the array is now rebuilt with fresh objects on every click
+  - The menu is anchored below the day cell in fixed positioning (flips above near the viewport bottom) and can no longer be clipped by the grid or its scroll container
+  - Mobile: the 7-column grid is fluid and fills the screen instead of overflowing with a silent horizontal scroll; compact cells with 44px touch targets
+  - Added guidance ("Click a day to pick its colors and add a note…"), a "Jump to today" header action, and an explicit "202X + n" year-offset label
+  - Removed the two floating decorative corner hooks, the duplicated LANGUAGE label (legend renamed "Calendar language"), and the full-width date input in the options bar
+  - Accessibility: day cells announce the date and note state, keyboard focus ring, non-current-month days are no longer focusable, switch has a contextual label, the offset input is properly labelled, the day menu is a labelled dialog closable with Escape or an outside click
+  - Fixed a timezone off-by-one: the date picker and grid now agree on local dates instead of UTC-converted ones
+
 ### 2.13.5
 - Improve : UI foundation pass — shared shell + design-system fixes across every page (from the full UI audit)
   - Markdown rendering: the `prose` class renamed `md-prose` escapes Tailwind Typography's defaults — no more literal backticks in code chips, column centered at 70ch, body text raised to 15.4px, stable heading ids for anchors (numeric suffix on duplicates)
