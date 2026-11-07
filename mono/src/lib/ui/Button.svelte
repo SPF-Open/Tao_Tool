@@ -4,6 +4,8 @@
     disabled?: boolean;
     onclick?: (e: MouseEvent) => void;
     type?: "button" | "submit" | "reset";
+    /** Native tooltip — commonly used to explain a disabled button. */
+    title?: string;
     children?: import('svelte').Snippet;
   }
 
@@ -12,6 +14,7 @@
     disabled = false,
     onclick = undefined,
     type = "button",
+    title = undefined,
     children,
   }: Props = $props();
 </script>
@@ -21,6 +24,7 @@
   class="btn variant-{variant}"
   onclick={onclick}
   disabled={disabled}
+  {title}
 >
   {@render children?.()}
 </button>

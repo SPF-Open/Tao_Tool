@@ -2,7 +2,6 @@
   import Download from "./Input/Download.svelte";
   import { Combobox } from "$lib/ui";
   import RadioGroup from "$lib/ui/RadioGroup.svelte";
-  import Switch from "$lib/ui/Switch.svelte";
   import {
     FileSpreadsheet,
     SlidersHorizontal,
@@ -12,8 +11,6 @@
   } from "lucide-svelte";
   import {
     currentSheet,
-    selectedFormat,
-    hideAnswer,
     workbook,
     langOutput,
     file,
@@ -31,13 +28,21 @@
 
   let sheet = $state<{ label: string; value: string }[]>([]);
 
-  workbook.subscribe((workbook) => {
-    if (!workbook || !workbook.SheetNames) return;
-    sheet = workbook.SheetNames.filter(
-      (s: string) => !sheetToIgnore.includes(s),
-    ).map((s: string) => ({ label: s, value: s }));
-    // Auto-select the first usable sheet so the preview populates immediately.
-    if (sheet.length) currentSheet.set(sheet[0].value);
+  // $effect tears the subscription down on unmount — a manual
+  // .subscribe() used to leak and stack up on every visit to the page.
+  $effect(() => {
+    return workbook.subscribe((wb) => {
+      if (!wb || !wb.SheetNames) return;
+      const usable = wb.SheetNames.filter(
+        (s: string) => !sheetToIgnore.includes(s),
+      ).map((s: string) => ({ label: s, value: s }));
+      sheet = usable;
+      // Auto-select the first usable sheet so the preview populates immediately.
+      // Use the local array, not the `sheet` state: reading `sheet` here would
+      // make it a dependency of this effect, and writing it in the callback
+      // would re-trigger the subscription forever (effect_update_depth_exceeded).
+      if (usable.length) currentSheet.set(usable[0].value);
+    });
   });
 
   // Persist which sections are open across reloads.
@@ -92,30 +97,31 @@
         class="file-clear"
         type="button"
         onclick={clearFile}
-        aria-label="Change file"
+        aria-label="Remove file"
       >
         <X size={14} />
       </button>
     </div>
   {:else}
-    <p class="file-empty">No file loaded</p>
+    <div class="file-badge muted">
+      <FileSpreadsheet size={15} />
+      <span>No file loaded</span>
+    </div>
   {/if}
 
   <Section title="Source" bind:open={panels.source}>
     {#snippet icon()}<FileSpreadsheet size={15} />{/snippet}
-    <Combobox choices={sheet} bind:value={$currentSheet} />
+    <Combobox
+      choices={sheet}
+      bind:value={$currentSheet}
+      placeholder="Select a file first"
+      label="Source sheet"
+      disabled={!$workbook}
+    />
   </Section>
 
   <Section title="Output" bind:open={panels.output}>
     {#snippet icon()}<SlidersHorizontal size={15} />{/snippet}
-    <!-- <RadioGroup
-      legend="Format"
-      choices={[
-        { label: "CSV", value: "CSV" },
-        { label: "PDF", value: "PDF" },
-      ]}
-      bind:value={$selectedFormat}
-    /> -->
     <RadioGroup
       legend="Language"
       choices={[
@@ -125,10 +131,6 @@
       ]}
       bind:value={$langOutput}
     />
-    <!-- <label class="switch-row">
-      <span>Hide answers</span>
-      <Switch bind:checked={$hideAnswer} />
-    </label> -->
   </Section>
 
   <Section title="Column mapping" bind:open={panels.columns}>
@@ -151,6 +153,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    /* Fill the sidebar so .bottom's margin-top:auto pins the download
+       button to the bottom as designed. */
+    flex: 1;
   }
 
   .file-badge {
@@ -162,6 +167,12 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     color: var(--text);
+  }
+
+  .file-badge.muted {
+    color: var(--text-muted);
+    background: var(--surface);
+    border-style: dashed;
   }
 
   .file-name {
@@ -192,14 +203,6 @@
   .file-clear:hover {
     color: var(--text);
     background: var(--surface);
-  }
-
-  .file-empty {
-    margin: 0;
-    padding: 4px 10px;
-    font-size: 12px;
-    font-style: italic;
-    color: var(--text-muted);
   }
 
   .bottom {

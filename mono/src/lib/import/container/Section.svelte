@@ -11,10 +11,18 @@
   }
 
   let { title, open = $bindable(true), icon, children }: Props = $props();
+
+  const contentId = `section-content-${Math.random().toString(36).slice(2, 8)}`;
 </script>
 
 <div class="section">
-  <button class="section-header" type="button" onclick={() => (open = !open)}>
+  <button
+    class="section-header"
+    type="button"
+    onclick={() => (open = !open)}
+    aria-expanded={open}
+    aria-controls={contentId}
+  >
     <span class="section-title">
       {#if icon}{@render icon()}{/if}
       <span>{title}</span>
@@ -24,7 +32,7 @@
     </span>
   </button>
   {#if open}
-    <div class="section-content" transition:slide={{ duration: 200 }}>
+    <div class="section-content" id={contentId} transition:slide={{ duration: 200 }}>
       {@render children?.()}
     </div>
   {/if}
@@ -52,6 +60,11 @@
 
   .section-header:hover {
     background: var(--surface);
+  }
+
+  .section-header:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.25);
   }
 
   .section-title {
