@@ -18,6 +18,18 @@
     sidebarEnabled.set(true);
     return () => sidebarEnabled.set(false);
   });
+
+  // In drawer mode (≤640px) the main content is inert while the drawer is
+  // open, so keyboard/screen-reader users can't tab behind the overlay.
+  let isDrawerMode = $state(false);
+  $effect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => (isDrawerMode = mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  });
 </script>
 
 <div class="content">
@@ -34,7 +46,7 @@
     </aside>
   </div>
 
-  <div class="main-area">
+  <div class="main-area" inert={$sidebarOpen && isDrawerMode}>
     {@render children?.()}
   </div>
 </div>

@@ -27,7 +27,7 @@
   const subtitles: Record<Tab, string> = {
     db: "Create, open and export your portable .taodb question library.",
     ingest: "Import TAO .zip exports, Excel files, or ZIP enriched with Excel competencies.",
-    search: "Search the question bank instantly; refine with the filters on the left.",
+    search: "Search the question bank instantly; refine with the sidebar filters.",
     exams: "Build fake exams from your library questions, preview them and export to Excel.",
   };
 
@@ -68,10 +68,10 @@
       {#each tabs as t (t.id)}
         {@const Icon = t.icon}
         <button type="button" class="mode-btn" class:active={tab === t.id} onclick={() => (tab = t.id)}
-          aria-current={tab === t.id ? "page" : undefined}>
+          aria-pressed={tab === t.id}>
           <Icon size={15} strokeWidth={1.75} />
           <span>{t.label}</span>
-          {#if t.id === "db" && $dbInfo}<span class="dot" aria-hidden="true"></span>{/if}
+          {#if t.id === "db" && $dbInfo}<span class="dot" aria-hidden="true"></span><span class="sr-only">library loaded</span>{/if}
         </button>
       {/each}
     </nav>
@@ -79,20 +79,22 @@
     {#if tab === "search"}
       <SearchFilters />
     {:else if tab === "db"}
-      <p class="side-hint">Manage your library file on the right. Everything stays in your browser.</p>
+      <p class="side-hint">Your library is a portable <code>.taodb</code> file — create one, or open an existing one.</p>
     {:else if tab === "exams"}
-      <p class="side-hint">Create a fake exam, then search and add questions to it on the right. Changes save instantly.</p>
+      <p class="side-hint">Create a fake exam, then search and add questions to it in the main panel. Changes save instantly.</p>
     {:else}
       <p class="side-hint">Import TAO <code>.zip</code> exports, <code>.xlsx</code> Excel files, or both together to enrich competencies.</p>
     {/if}
 
     <div class="divider"></div>
 
-    <button type="button" class="query-btn" onclick={() => (queryOpen = true)} disabled={!$dbInfo}>
+    <button type="button" class="query-btn" onclick={() => (queryOpen = true)} disabled={!$dbInfo}
+      title={$dbInfo ? "Write a SQL query against your library" : "Open or create a library first"}>
       <TerminalSquare size={15} strokeWidth={1.75} /> Write SQL query
     </button>
 
-    <button type="button" class="query-btn" onclick={() => (aiPromptOpen = true)} disabled={!$dbInfo}>
+    <button type="button" class="query-btn" onclick={() => (aiPromptOpen = true)} disabled={!$dbInfo}
+      title={$dbInfo ? "Ask AI to draft a SQL query" : "Open or create a library first"}>
       <Sparkles size={15} strokeWidth={1.75} /> Ask AI to write SQL
     </button>
 
@@ -144,6 +146,13 @@
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); margin-left: auto; }
 
   .side-hint { margin: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    margin: -1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
   code { font-family: ui-monospace, monospace; font-size: 0.85em; }
 
   .divider { height: 1px; background: var(--border); margin: 2px 0; }

@@ -58,46 +58,6 @@
         window.print();
         break;
       }
-      // case 'qti': {
-      //   const lang = $langOutput;
-      //   const { manifest, questionsManifest } = exportToQTI(sheet, {
-      //     lang,
-      //   });
-
-      //   const manifestBlob = new Blob([manifest.toString()], {
-      //     type: 'text/xml',
-      //   });
-      //   const questionsManifestBlob = questionsManifest.map(
-      //     (q) => new Blob([q.toString()], { type: 'text/xml' }),
-      //   );
-
-      //   const ex = async () => {
-      //     const zipFileStream = new TransformStream();
-      //     const zipFileBlobPromise = new Response(
-      //       zipFileStream.readable,
-      //     ).blob();
-
-      //     const zipWriter = new ZipWriter(new BlobWriter('application/zip'));
-
-      //     // Create manifest xml file
-      //     await zipWriter.add('imsmanifest.xml', new BlobReader(manifestBlob));
-
-      //     await Promise.all(
-      //       questionsManifestBlob.map((b, n) =>
-      //         zipWriter.add(`items/${n}/qti.xml`, new BlobReader(b)),
-      //       ),
-      //     );
-
-      //     const finalBlob = await zipWriter.close();
-
-      //     linkFile.setAttribute('href', URL.createObjectURL(finalBlob));
-      //     linkFile.download = fileName + '.zip';
-      //     linkFile.click();
-      //   };
-      //   ex();
-
-      //   break;
-      // }
       default: {
         // Unsupported format: nothing to download.
       }
@@ -106,7 +66,11 @@
 </script>
 
 <a bind:this={linkFile} href="about:blank" download aria-label="Download export" tabindex="-1"></a>
-<Button onclick={onClick}>
+<Button
+  onclick={onClick}
+  disabled={!$workbook || !$currentSheet}
+  title={$workbook ? "Download the export" : "Import a file first"}
+>
   <div class="button">
   <FilesIcon size={18} />
     <span> Download Export</span>

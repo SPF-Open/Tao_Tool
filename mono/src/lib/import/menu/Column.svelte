@@ -42,7 +42,10 @@
 {/snippet}
 
 <div class="fields">
-  <Combobox choices={templateChoices} bind:value={$followTemplate} />
+  <Combobox legend="Template" label="Template" choices={templateChoices} bind:value={$followTemplate} />
+  {#if lockRequired}
+    <p class="template-hint">Columns follow the selected template — choose "Other" to edit them.</p>
+  {/if}
 
   <div class="required-row">
     {@render letterField("Title", $titleColumn, titleColumn, lockRequired)}
@@ -63,6 +66,13 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .template-hint {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text-muted);
   }
 
   .required-row {
@@ -111,16 +121,12 @@
 
   .letter:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.18);
   }
 
   .letter:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-
-  :global(.dark) .letter:focus {
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
   }
 </style>

@@ -2,17 +2,19 @@
   interface Props {
     checked?: boolean;
     disabled?: boolean;
+    /** Accessible name — "Toggle switch" alone gives screen readers no context. */
+    label?: string;
     ["bind:checked"]?: any;
   }
 
-  let { checked = $bindable(false), disabled = false } = $props();
+  let { checked = $bindable(false), disabled = false, label = "Toggle switch" } = $props();
 </script>
 
 <button type="button"
   role="switch"
   aria-checked={checked}
   aria-disabled={disabled}
-  aria-label="Toggle switch"
+  aria-label={label}
   disabled={disabled}
   class="switch"
   class:checked
@@ -46,6 +48,14 @@
     flex-shrink: 0;
   }
 
+  .switch::before {
+    /* Invisible hit-area extension: the 32×18 track stays compact but taps
+       land on a ≥44×30 target. */
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+
   .switch::after {
     content: "";
     position: absolute;
@@ -70,7 +80,7 @@
     box-shadow: var(--shadow-sm);
   }
 
-  .switch:focus {
+  .switch:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
   }

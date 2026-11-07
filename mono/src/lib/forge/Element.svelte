@@ -17,8 +17,6 @@
   </div>
   <hr>
   <div class="content">
-    <div class="lefttop corner"></div>
-    <div class="rightbottom corner"></div>
     {@render children?.()}
   </div>
 </div>
@@ -35,8 +33,12 @@
   }
   h2 {
     text-align: center;
-    color: var(--text);
-    margin: 0.25rem 0;
+    margin: 0.4rem 0 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
   hr {
     border: none;
@@ -57,6 +59,35 @@
     align-items: center;
     gap: 0.25rem;
   }
+  /* The date picker used to stretch across the whole options bar — keep it
+     compact and consistent with the other controls. */
+  .options :global(input[type="date"]) {
+    width: 11rem;
+    flex: none;
+  }
+
+  /* Phones & small tablets: stack the controls into a tidy column instead of
+     a scattered centered wrap. */
+  @media (max-width: 720px) {
+    .options {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .options :global(>*) {
+      justify-content: space-between;
+    }
+
+    .options :global(nav) {
+      gap: 0.5rem;
+    }
+
+    .options :global(nav > *) {
+      flex: 1;
+      justify-content: center;
+    }
+  }
   .content {
     position: relative;
     margin: 1rem auto;
@@ -64,32 +95,14 @@
     padding: 2rem;
   }
 
-  /* Phones: stop the content box from sizing to a wide child (e.g. the
-     calendar grid) — fill the viewport instead and let the child scroll. */
-  @media (max-width: 640px) {
+  /* Phones & small tablets: stop the content box from sizing to a wide child
+     (e.g. the calendar grid) — fill the viewport instead and let the child
+     adapt. Same band as the calendar's fluid-grid breakpoint. */
+  @media (max-width: 960px) {
     .content {
       width: auto;
       max-width: 100%;
       padding: 1rem;
     }
-  }
-
-  .corner {
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid var(--border-strong);
-    border-right: none;
-    border-bottom: none;
-    position: absolute;
-  }
-  .lefttop {
-    top: 0.5rem;
-    left: 0.5rem;
-  }
-
-  .rightbottom {
-    bottom: 0.5rem;
-    right: 0.5rem;
-    rotate: 180deg;
   }
 </style>

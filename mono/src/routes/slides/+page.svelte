@@ -172,14 +172,13 @@
       <ChevronLeft size={20} strokeWidth={1.75} />
     </button>
 
-    <div class="dots" role="tablist" aria-label="Slides">
+    <div class="dots" aria-label="Slides">
       {#each slides as label, i (label)}
         <button
           type="button"
           class="dot"
           class:active={i === current}
-          role="tab"
-          aria-selected={i === current}
+          aria-current={i === current ? "true" : undefined}
           aria-label={`Slide ${i + 1}: ${label}`}
           title={label}
           onclick={() => go(i)}
@@ -250,9 +249,15 @@
     position: absolute;
     inset: 0;
     display: grid;
-    place-items: center;
+    /* Start alignment + auto margins: centered when the slide fits, safely
+       top-anchored (and scrollable) when it overflows on small screens. */
+    place-items: start;
     padding: clamp(1.25rem, 5vw, 4rem);
     overflow: auto;
+  }
+
+  .slide > :global(*) {
+    margin: auto;
   }
 
   /* ── Controls ──────────────────────────────────────────── */
@@ -303,6 +308,7 @@
   }
 
   .dot {
+    position: relative;
     width: 8px;
     height: 8px;
     padding: 0;
@@ -313,6 +319,14 @@
     transition:
       background 0.2s ease,
       width 0.2s ease;
+  }
+
+  /* Invisible hit-area extension: 8px visual, ≥24px tap target. */
+  .dot::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
   }
 
   .dot:hover {

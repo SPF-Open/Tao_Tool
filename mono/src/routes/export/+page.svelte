@@ -240,7 +240,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - var(--layout-header-height) - var(--header-height) - 80px);
+    min-height: calc(100vh - var(--layout-header-height) - 48px);
   }
 
   .dropzone-inner {

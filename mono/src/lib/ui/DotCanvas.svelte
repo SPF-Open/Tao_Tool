@@ -12,7 +12,7 @@
     interactive?: boolean;
     /** Draw faint constellation links between active dots near the cursor. */
     links?: boolean;
-    /** Slow ambient shimmer so the grid breathes even without the mouse. */
+    /** Accepted for API compatibility; the grid has no time-based shimmer. */
     ambient?: boolean;
     /** Expanding ripple pulse on click/tap. */
     ripple?: boolean;
@@ -34,10 +34,10 @@
     const ctx = canvas.getContext('2d')!;
     const mouse = { x: -9999, y: -9999 };
     let raf = 0;
+    let cssW = 0;
+    let cssH = 0;
 
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const ambientOn = ambient && !reduce;
-    const rippleOn = ripple && !reduce;
+    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // Active click ripples: each expands outward then fades.
     type Ripple = { x: number; y: number; t0: number };
@@ -47,18 +47,36 @@
     const RIPPLE_BAND = 60; // px — thickness of the bright ring
 
     function resize() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      const dpr = window.devicePixelRatio || 1;
+      cssW = canvas.offsetWidth;
+      cssH = canvas.offsetHeight;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      schedule();
+    }
+
+    // The grid is static unless the mouse is over it or a ripple is alive,
+    // so frames are only rendered on demand — no permanent rAF loop.
+    function schedule() {
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+
+    function frame(now: number) {
+      raf = 0;
+      draw(now);
+      if (!reduceMq.matches && ripples.length) schedule();
     }
 
     function draw(now: number) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, cssW, cssH);
       const isDark = document.documentElement.classList.contains('dark');
       // light: indigo brand | dark: emerald brand — matches --brand token.
       const [cr, cg, cb] = isDark ? [52, 211, 153] : [99, 102, 241];
 
-      const cols = Math.ceil(canvas.width / gap) + 1;
-      const rows = Math.ceil(canvas.height / gap) + 1;
+      const cols = Math.ceil(cssW / gap) + 1;
+      const rows = Math.ceil(cssH / gap) + 1;
+      const rippleOn = ripple && !reduceMq.matches;
 
       // Drop expired ripples.
       if (rippleOn && ripples.length) {
@@ -66,7 +84,7 @@
       }
 
       // First pass: compute per-dot intensity so links can reuse it.
-      // intensity = mouse glow + ambient breathing + ripple rings.
+      // intensity = mouse glow + ripple rings.
       const intensity = new Float32Array(cols * rows);
 
       for (let row = 0; row < rows; row++) {
@@ -148,46 +166,61 @@
           }
         }
       }
-
-      raf = requestAnimationFrame(draw);
     }
 
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     resize();
-    raf = requestAnimationFrame(draw);
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
+      schedule();
     };
-    const onMouseLeave = () => { mouse.x = -9999; mouse.y = -9999; };
+    const onMouseLeave = () => {
+      mouse.x = -9999;
+      mouse.y = -9999;
+      schedule();
+    };
     const onClick = (e: MouseEvent) => {
-      if (!rippleOn) return;
+      if (!ripple || reduceMq.matches) return;
       const rect = canvas.getBoundingClientRect();
       ripples.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, t0: performance.now() });
       if (ripples.length > 6) ripples.shift();
+      schedule();
     };
+    const onMotionPreferenceChange = () => {
+      if (reduceMq.matches) {
+        ripples = [];
+        if (raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        }
+      }
+      schedule();
+    };
+    // Redraw when the theme toggles (light/dark brand colors differ).
+    const themeObserver = new MutationObserver(schedule);
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     if (interactive) {
       window.addEventListener('mousemove', onMouseMove);
       canvas.addEventListener('mouseleave', onMouseLeave);
     }
-    if (rippleOn) {
-      window.addEventListener('pointerdown', onClick);
-    }
+    window.addEventListener('pointerdown', onClick);
+    reduceMq.addEventListener('change', onMotionPreferenceChange);
 
     return () => {
-      cancelAnimationFrame(raf);
+      if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
+      themeObserver.disconnect();
       if (interactive) {
         window.removeEventListener('mousemove', onMouseMove);
         canvas.removeEventListener('mouseleave', onMouseLeave);
       }
-      if (rippleOn) {
-        window.removeEventListener('pointerdown', onClick);
-      }
+      window.removeEventListener('pointerdown', onClick);
+      reduceMq.removeEventListener('change', onMotionPreferenceChange);
     };
   });
 </script>

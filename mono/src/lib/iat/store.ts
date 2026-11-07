@@ -17,6 +17,9 @@ file.subscribe((file) => {
     return;
   }
   if (file.type !== XLSX_MIME) {
+    // Defensive: the FileInput already rejects non-XLSX files, but a file
+    // slipping through here used to be ignored in total silence.
+    pushError("Unsupported file", `"${file.name}" is not an XLSX workbook.`);
     return;
   }
   const reader = new FileReader();

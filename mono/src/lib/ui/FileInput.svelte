@@ -11,6 +11,15 @@
     multiple?: boolean;
     disabled?: boolean;
     invalidTitle?: string;
+    /** Accessible name of the upload region — pass a distinct one when a
+        page renders several FileInputs. */
+    label?: string;
+    /** Button text (localized by the page — pages mix EN and FR UIs). */
+    dropLabel?: string;
+    /** Format hint shown under the label (e.g. "XLSX or CSV"). */
+    hint?: string;
+    /** Pluralization for the "N file(s) selected" line — localized by the page. */
+    countLabel?: (count: number) => string;
     /** Called with the accepted files whenever a valid selection is made. */
     onfiles?: (files: File[]) => void;
     [key: string]: any;
@@ -22,6 +31,10 @@
     multiple = false,
     disabled = false,
     invalidTitle = "Unsupported file type",
+    label = "File upload area",
+    dropLabel = "Click to upload or drag and drop",
+    hint = "",
+    countLabel = (count: number) => `${count} file${count !== 1 ? "s" : ""} selected`,
     onfiles = undefined,
     ...rest
   } = $props();
@@ -30,6 +43,8 @@
   let errorMessage = $state("");
   let rejected = $state(false);
   let showFiles = $state(false);
+  let dragging = $state(false);
+  let dragDepth = 0;
   let rejectTimer: ReturnType<typeof setTimeout> | undefined;
 
   const acceptedTypes = $derived(parseAccept(accept));
@@ -77,14 +92,30 @@
     acceptFiles(Array.from(target.files || []));
   }
 
+  function handleDragEnter(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepth += 1;
+    dragging = true;
+  }
+
   function handleDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
   }
 
+  function handleDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) dragging = false;
+  }
+
   function handleDrop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
+    dragDepth = 0;
+    dragging = false;
     if (!disabled) {
       const droppedFiles = Array.from(event.dataTransfer?.files || []);
       acceptFiles(multiple ? droppedFiles : droppedFiles.slice(0, 1));
@@ -95,11 +126,14 @@
 <div class="file-input-wrapper">
   <div
     role="region"
-    aria-label="File upload area"
+    aria-label={label}
     class="file-input-area"
     class:disabled
     class:rejected
+    class:dragging
+    ondragenter={handleDragEnter}
     ondragover={handleDragOver}
+    ondragleave={handleDragLeave}
     ondrop={handleDrop}
   >
     <input
@@ -119,7 +153,10 @@
       disabled={disabled}
     >
       <Upload size={20} />
-      <span>Click to upload or drag and drop</span>
+      <span>{dropLabel}</span>
+      {#if hint}
+        <span class="file-hint">{hint}</span>
+      {/if}
     </button>
     {#if errorMessage}
       <p class="file-error" role="alert">{errorMessage}</p>
@@ -133,7 +170,7 @@
           onclick={() => (showFiles = !showFiles)}
         >
           <ChevronDown size={14} strokeWidth={2} class="file-chevron {showFiles ? 'open' : ''}" />
-          <span class="file-count">{file.length} file{file.length !== 1 ? 's' : ''} selected</span>
+          <span class="file-count">{countLabel(file.length)}</span>
         </button>
         {#if showFiles}
           <ul transition:slide={{ duration: slideDur }}>
@@ -153,17 +190,22 @@
   }
 
   .file-input-area {
-    border: 2px dashed var(--border);
+    border: 2px dashed var(--border-strong);
     border-radius: var(--radius-lg);
     padding: 8px;
     text-align: center;
-    transition: border-color 200ms ease;
+    transition: border-color 200ms ease, background-color 200ms ease;
     background-color: var(--surface);
   }
 
-  .file-input-area:hover:not(.disabled) {
+  .file-input-area:hover:not(.disabled),
+  .file-input-area.dragging {
     border-color: var(--primary);
-    background-color: var(--surface);
+    background-color: color-mix(in srgb, var(--brand-rgb) 5%, var(--surface));
+  }
+
+  .file-input-area.dragging {
+    border-style: solid;
   }
 
   .file-input-area.rejected {
@@ -194,6 +236,12 @@
 
   .file-input-button:hover:not(:disabled) {
     color: var(--text);
+  }
+
+  .file-hint {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
   }
 
   .file-input-button:focus-visible {

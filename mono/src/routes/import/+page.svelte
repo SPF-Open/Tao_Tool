@@ -4,7 +4,7 @@
   import Menu from "$lib/import/Menu.svelte";
   import QuestionPreview from "$lib/export/template/Question.svelte";
   import { showAnswer } from "$lib/export/store";
-  import { pushError } from "$lib/ui/notifications";
+  import { pushError, pushNotification } from "$lib/ui/notifications";
   import DropZone from "$lib/import/Input/DropZone.svelte";
   import {
     alternative,
@@ -21,6 +21,7 @@
     rowOffset,
     skipRow,
     titleColumn,
+    workbook,
   } from "$lib/import/helper/store";
   import { QCM, Question } from "$lib/import/helper/question";
   import { qcmsToAssessmentItems } from "$lib/import/helper/toQuestionType";
@@ -32,7 +33,6 @@
 
   let questions = $state<QCM[]>([]);
   let itemVisibility = $state<Map<string, boolean>>(new Map());
-  let workbook = $state<XLSX.WorkBook | undefined>(undefined);
   let showMeta = $state(false);
 
   const renderItems = $derived(qcmsToAssessmentItems(questions));
@@ -44,9 +44,10 @@
     showAnswer.set(!$hideAnswer);
   });
 
-  const parseAndShow = (wb: XLSX.WorkBook) => {
+  const parseAndShow = (wb: XLSX.WorkBook): QCM[] => {
+    let parsed: QCM[] = [];
     try {
-      questions = Question.parseSheet(
+      parsed = Question.parseSheet(
         wb.Sheets[get(currentSheet)],
         {
           title: get(titleColumn),
@@ -64,10 +65,11 @@
         },
       );
     } catch (e) {
-      questions = [];
       pushError("Parse Error", e instanceof Error ? e.message : String(e));
     }
+    questions = parsed;
     itemVisibility = new Map();
+    return parsed;
   };
 
   // Read the selected file into a workbook. $effect subscriptions are torn
@@ -75,16 +77,22 @@
   // (and re-parse N times) after every visit to this page.
   $effect(() => {
     const f = $file;
-    if (!f) return;
+    if (!f) {
+      workbook.set(null);
+      return;
+    }
     questions = [];
+    // A new workbook invalidates the previous sheet choice; Menu.svelte
+    // re-selects the first usable sheet once the workbook is set.
+    currentSheet.set("");
     let stale = false;
     f.arrayBuffer()
       .then((buffer) => {
-        if (!stale) workbook = XLSX.read(buffer);
+        if (!stale) workbook.set(XLSX.read(buffer));
       })
       .catch((e) => {
         if (stale) return;
-        workbook = undefined;
+        workbook.set(null);
         pushError("File Error", `Could not read "${f.name}": ${e instanceof Error ? e.message : String(e)}`);
       });
     return () => {
@@ -92,12 +100,34 @@
     };
   });
 
-  // Re-parse when the workbook, the selected sheet or the column/row
-  // configuration changes.
+  // Re-parse when the workbook, the selected sheet or any column/row
+  // setting changes (including the metadata columns and skipRow, which
+  // parseAndShow reads non-reactively via get()).
+  let emptyNotifiedFor: File | null = null;
   $effect(() => {
     $column_row;
     $currentSheet;
-    if (workbook) parseAndShow(workbook);
+    $competencyColumn;
+    $indicatorColumn;
+    $competencyDescrColumn;
+    $masteryDescrColumn;
+    $skipRow;
+    const wb = $workbook;
+    if (wb) {
+      // parseAndShow returns the fresh array so this effect never reads the
+      // `questions` state it also writes (that would loop).
+      const parsed = parseAndShow(wb);
+      // SheetJS parses almost anything into *some* workbook — a file that
+      // yields zero questions must not fail silently.
+      if (parsed.length === 0 && $file && emptyNotifiedFor !== $file) {
+        emptyNotifiedFor = $file;
+        pushNotification({
+          title: "No questions found",
+          message: `Nothing could be parsed from "${$file.name}". Check the template and column mapping.`,
+          variant: "warning",
+        });
+      }
+    }
   });
 </script>
 
@@ -160,6 +190,7 @@
           icon={FileSpreadsheet}
           title="Import a question file"
           description="Upload an Excel workbook to generate a TAO export."
+          headingLevel="h1"
         >
           {#snippet children()}
             <div class="dropzone-inner">
@@ -230,7 +261,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - var(--layout-header-height) - 32px);
+    min-height: calc(100dvh - var(--layout-header-height) - 32px);
   }
 
   .dropzone-inner {

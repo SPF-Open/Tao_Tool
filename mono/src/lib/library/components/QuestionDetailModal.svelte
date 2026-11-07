@@ -124,6 +124,21 @@
   .test { margin: 0; font-size: 0.82rem; color: var(--text-muted); }
   h3 { margin: 0 0 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
   .prose { color: var(--text); line-height: 1.55; font-size: 0.92rem; }
+  /* Base typography for the rendered prompt HTML — kept local since the app
+     no longer loads the Tailwind Typography plugin. */
+  .prose :global(p) { margin: 0 0 0.6rem; }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 0.6rem; padding-left: 1.25rem; }
+  .prose :global(h1), .prose :global(h2), .prose :global(h3), .prose :global(h4) { margin: 0.9rem 0 0.4rem; font-weight: 600; line-height: 1.3; }
+  .prose :global(h1) { font-size: 1.15rem; }
+  .prose :global(h2) { font-size: 1.05rem; }
+  .prose :global(h3), .prose :global(h4) { font-size: 0.95rem; }
+  .prose :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0.1em 0.35em;
+  }
+  .prose :global(pre) { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.7rem 0.9rem; overflow-x: auto; margin: 0 0 0.6rem; }
+  .prose :global(pre code) { background: none; border: none; padding: 0; }
   .prose :global(img) { max-width: 100%; height: auto; }
   .answers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
   .answers li {

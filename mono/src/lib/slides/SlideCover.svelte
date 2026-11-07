@@ -9,5 +9,5 @@
   </div>
   <p class="lead r" style="--i:1">Exams, end to end.</p>
   <p class="sub r" style="--i:3">A unified exam toolkit</p>
-  <p class="hint r" style="--i:4">press <kbd>→</kbd> to start</p>
+  <p class="hint r" style="--i:4"><span class="hint-keyboard">press <kbd>→</kbd> to start</span><span class="hint-touch">tap the arrow to start</span></p>
 </div>

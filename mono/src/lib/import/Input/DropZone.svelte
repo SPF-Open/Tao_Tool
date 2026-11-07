@@ -1,35 +1,18 @@
 <script lang="ts">
   import Files from "$lib/ui/Files.svelte";
-  import { currentSheet, file, name, workbook } from "../helper/store";
-  import * as XLSX from "xlsx";
-    import { writable } from "svelte/store";
+  import { file, name } from "../helper/store";
+  import { writable } from "svelte/store";
 
-  const maxLenghtName = 45;
-  let fileName = "";
   let fileTemp = writable<File[]>([]);
 
-  fileTemp.subscribe(async (f) => {
-    if(!f || !f.length) {
-      return;
-    }
+  // The workbook parsing lives in the page's $effect (single source of
+  // truth) — this component only records which file was picked.
+  fileTemp.subscribe((f) => {
+    if (!f || !f.length) return;
     const e = f[0];
-
-    fileName = fileTemp
-      ? e.name.length > maxLenghtName
-        ? e.name.slice(0, maxLenghtName - 3) + "..."
-        : e.name
-      : "";
-
-    // Update Store item
     file.update(() => e);
-    name.update(() => fileName.split(".").slice(0, -1).join());
-
-    // Restore options
-    currentSheet.update(() => "");
-
-    const data = await e.arrayBuffer();
-    /* data is an ArrayBuffer */
-    workbook.update(() => XLSX.read(data));
+    // Strip the extension for the default export file name.
+    name.update(() => e.name.replace(/\.[^.]+$/, ""));
   });
 </script>
 

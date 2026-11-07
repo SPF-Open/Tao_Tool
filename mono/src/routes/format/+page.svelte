@@ -127,18 +127,20 @@
   <meta name="twitter:image" content={`${SITE_URL}/og-image.png`} />
 </svelte:head>
 
-<SidebarLayout sidebarLabel="Format options">
+<SidebarLayout sidebarLabel="Source and questions">
   {#snippet sidebar()}
     <div class="panel">
       <h2 class="panel-title">Source package</h2>
-      <FileInput
-        accept=".zip"
-        invalidTitle="Unsupported file"
-        bind:file={files}
-        onfiles={onFiles}
-      />
-
-      {#if sourceFile}
+      {#if !sourceFile}
+        <FileInput
+          accept=".zip"
+          invalidTitle="Unsupported file"
+          bind:file={files}
+          onfiles={onFiles}
+        />
+      {:else}
+        <!-- Only the badge + change link once a file is loaded: the FileInput's
+           internal "1 file selected" list duplicated the badge. -->
         <div class="file-badge">
           <FileArchive size={15} />
           <span class="file-name" title={sourceFile.name}>{sourceFile.name}</span>
@@ -196,10 +198,23 @@
       <EmptyState
         icon={FileArchive}
         title="Upload a TAO QTI export"
-        description="Pick the .zip you exported from TAO. Exporting auto-formats every question's stem (bullet lines and line breaks) and bolds every prompt. Pick a question here first if you want to preview or adjust its result before exporting."
-      />
+        description="Select the .zip you exported from TAO to review each question before exporting."
+        centered
+      >
+        <!-- Primary action in the main area: on mobile the sidebar is a
+           closed drawer, so the upload must be reachable without it. -->
+        <FileInput
+          accept=".zip"
+          invalidTitle="Unsupported file"
+          label="Upload a TAO QTI export"
+          bind:file={files}
+          onfiles={onFiles}
+        />
+      </EmptyState>
     {:else if parsing}
-      <EmptyState icon={FileArchive} title="Reading the package…" />
+      <EmptyState icon={FileArchive} title="Reading the package…">
+        <div class="spinner" aria-hidden="true"></div>
+      </EmptyState>
     {:else if !selectedItem}
       <EmptyState
         icon={FileText}
@@ -254,6 +269,30 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    /* Fill the viewport so an EmptyState marked `centered` can vertically
+       center in the leftover space instead of sticking to the top. */
+    min-height: calc(100vh - var(--layout-header-height) - 3rem);
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(var(--brand-rgb), 0.25);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2.5s;
+    }
   }
 
   .panel {

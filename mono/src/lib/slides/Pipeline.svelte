@@ -205,6 +205,53 @@
       align-items: stretch;
       gap: 0.5rem;
     }
+    /* Densify so the whole 6-step pipeline fits a phone viewport without
+       being cut off. */
+    .pnode {
+      padding: 0.7rem 0.8rem;
+      gap: 0.6rem;
+    }
+    .pnode-icon :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+    .pnode-text {
+      gap: 0.1rem;
+    }
+  }
+
+  /* Short phones: drop the sub-copy so all 6 steps stay visible. */
+  @media (max-width: 720px) and (max-height: 700px) {
+    .pnode {
+      padding: 0.3rem 0.45rem;
+      gap: 0.3rem;
+    }
+
+    .srow {
+      gap: 0.35rem;
+    }
+
+    .pnode-icon :global(svg) {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* The step-number chip is decorative at this size — drop the line so
+       all six steps stay on screen. The icon tile shrinks from 46px so it
+       stops driving the card height. */
+    .pnode-num {
+      display: none;
+    }
+
+    .pnode-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius);
+    }
+
+    .pnode-sub {
+      display: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

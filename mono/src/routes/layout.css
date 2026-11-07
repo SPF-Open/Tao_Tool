@@ -1,8 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Self-hosted Inter (variable, latin subset) — no Google Fonts request. */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-latin-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
 
 
 :root {
@@ -48,7 +54,6 @@
   --font-size-base: 14px;
   --line-height: 1.5;
 
-  --header-height: 42px;
   --layout-header-height: 36px;
   --sidebar-width: 320px;
 }
@@ -280,4 +285,13 @@ input, select, textarea {
 ::selection {
   background: var(--accent);
   color: var(--accent-foreground);
+}
+
+/* App-wide fallback focus ring. Zero-specificity `:where(...)` so components
+   that draw their own ring keep it; everything else (shell buttons, nav
+   links) gets the brand ring instead of the UA default. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.22);
+  border-radius: var(--radius);
 }

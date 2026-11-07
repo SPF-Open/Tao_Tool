@@ -2,7 +2,7 @@
   import { writable } from "svelte/store";
   import type { Writable } from "svelte/store";
 
-  import { Day, Size, formatedDate, weekOfTheDay } from "./Calendar.helper";
+  import { Day, Size, formatedDate, monthOfTheYear, weekOfTheDay } from "./Calendar.helper";
   import DayMenu from "./DayMenu.svelte";
   import { lang } from "../store";
   import Element from "../Element.svelte";
@@ -26,19 +26,28 @@
   let yearOffset = $state(0);
   let showNonCurrentMonth = $state(false);
 
+  // Local YYYY-MM-DD helpers: `toISOString` is UTC-based, so a date chosen in
+  // the picker could land on the neighbouring day/month in non-UTC timezones.
+  const toLocalISO = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const fromLocalISO = (s: string) => {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  };
+
   // When we update the date with datepicker
   $effect(() => {
     return dateString.subscribe((d: string) => {
-      const dateStringTemp = $date.toISOString().split("T")[0];
+      const dateStringTemp = toLocalISO($date);
       if (d && dateStringTemp !== $dateString) {
-        date.update(() => new Date(d));
+        date.update(() => fromLocalISO(d));
       }
     });
   });
 
   $effect(() => {
     return date.subscribe((d: Date) => {
-      const dateStringTemp = $date.toISOString().split("T")[0];
+      const dateStringTemp = toLocalISO($date);
       if (dateStringTemp !== $dateString) {
         dateString.update(() => dateStringTemp);
       }
@@ -50,11 +59,25 @@
     date.update((d: Date) => new Date(d.getFullYear(), d.getMonth() + offset, 15));
   };
 
-  const onDayClick = (day: Day, force = true) => {
-    if (force) days.map((d) => (d.menu = false));
-    day.menu = !day.menu;
-    days = [...days];
+  const onDayClick = (target: Day, force = true) => {
+    // Rebuild with fresh Day objects: mutating `menu` on the existing items
+    // does not retrigger the each-block render (pre-existing bug — the edit
+    // menu never appeared). New item references always re-render.
+    days = days.map((d) => {
+      const next = new Day(d.day, d.isCurrentMonth, d.text, d.bg, d.bd, d.menu);
+      if (force) {
+        next.menu = d === target ? !d.menu : false;
+      } else if (d === target) {
+        next.menu = !d.menu;
+      }
+      return next;
+    });
   };
+
+  const monthName = $derived(monthOfTheYear[$lang][$date.getMonth()]);
+  const offsetLabel = $derived(
+    yearOffset === 0 ? "" : ` ${yearOffset > 0 ? "+" : "−"} ${Math.abs(yearOffset)}`
+  );
 </script>
 
 <Element>
@@ -79,23 +102,24 @@
       />
       <div class="option-row">
         <label for="offset">Offset</label>
-        <Numeric name="offset" bind:value={yearOffset} size="sm" />
+        <Numeric name="offset" id="offset" bind:value={yearOffset} size="sm" />
       </div>
       <div class="option-row">
         <span>Non-current month</span>
-        <Switch bind:checked={showNonCurrentMonth} />
+        <Switch bind:checked={showNonCurrentMonth} label="Show non-current month days" />
       </div>
     
   {/snippet}
   {#snippet children()}
   
       <h2 class="date">
-        {formatedDate($date, $lang)}{yearOffset
-          ? (yearOffset > 0 ? "+" : "") + yearOffset
-          : ""}
+        {formatedDate($date, $lang)}{offsetLabel}
       </h2>
+      <p class="grid-help">
+        Click a day to pick its colors and add a note. 202X is a template year wildcard — Offset only shifts this label.
+      </p>
       <div class="grid-scroll">
-        <div class="grid" style="--nbRow:{rows}}">
+        <div class="grid" style="--nbRow:{rows}">
           {#each weekOfTheDay[$lang] as day}
             <div class="weekday cell {size}">{day}</div>
           {/each}
@@ -103,8 +127,11 @@
             <div
               class="day cell {size}"
               class:currentMonth={day.isCurrentMonth || showNonCurrentMonth}
+              class:menuOpen={day.menu}
               role="button"
-              tabindex="0"
+              tabindex={day.isCurrentMonth || showNonCurrentMonth ? 0 : -1}
+              aria-label="{day.day} {monthName}{day.text ? `, note: ${day.text}` : ''}"
+              aria-expanded={day.menu}
               onclick={() => onDayClick(day)}
               onkeydown={(event) => {
                 if (event.key === "Enter" || event.key === " ") onDayClick(day);
@@ -130,9 +157,18 @@
 <style>
   .date {
     margin: 0.2rem;
-    font-size: 2rem;
+    font-size: 1.35rem;
     text-align: center;
     color: var(--text);
+  }
+
+  .grid-help {
+    margin: 0 auto 0.6rem;
+    max-width: 60ch;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-muted);
   }
 
   .option-row {
@@ -153,15 +189,20 @@
     --bd: var(--border);
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(var(--rows), 1fr);
+    grid-template-rows: repeat(var(--nbRow), 1fr);
     border-radius: var(--radius-lg);
     position: relative;
     box-shadow: var(--shadow);
     border: 1px solid var(--bd);
     width: fit-content;
     margin: 0 auto;
-    overflow: hidden;
     background: var(--surface-elevated);
+  }
+
+  /* The open day's edit menu overflows the grid — keep the whole cell above
+     its siblings so the menu is never painted over. */
+  .day.menuOpen {
+    z-index: 5;
   }
 
   .weekday {
@@ -227,6 +268,13 @@
     z-index: 1;
   }
 
+  .day:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 3px rgba(var(--brand-rgb), 0.55);
+    color: var(--text);
+    z-index: 1;
+  }
+
   .innerCell {
     padding: 0.5rem;
     display: flex;
@@ -253,4 +301,43 @@
     color: var(--text);
   }
 
+  /* Phones & small tablets: the fixed-size cells (7 × 8rem = 896px) overflow
+     any viewport under ~960px — the grid becomes fluid and fills the screen. */
+  @media (max-width: 960px) {
+    .grid {
+      width: 100%;
+    }
+
+    .cell.sm,
+    .cell.md,
+    .cell.lg {
+      width: auto;
+      min-width: 0;
+    }
+
+    .day {
+      min-height: 44px;
+    }
+
+    .innerCell {
+      border-width: 3px;
+      padding: 0.25rem;
+    }
+
+    .innerCell span {
+      font-size: 0.78rem;
+    }
+
+    /* With the sidebar open the grid can drop to ~55px per column — labels
+       shrink and clip instead of pushing the cells apart. */
+    .weekday {
+      font-size: 0.6rem;
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      padding: 0.3rem 0;
+    }
+  }
+
 </style>
+

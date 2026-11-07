@@ -75,10 +75,43 @@
     line-height: 1.4;
   }
 
+  @media (max-width: 720px) and (max-height: 700px) {
+    .strengths {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    .strength {
+      padding: 0.45rem 0.55rem;
+    }
+
+    .strength-note {
+      font-size: 0.7rem;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .strength-bar {
       animation: none !important;
       width: 100%;
+    }
+  }
+
+  /* Densify so the four cards fit a phone viewport without being cut off. */
+  @media (max-width: 720px) {
+    .strengths {
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .strength {
+      padding: 0.8rem 0.85rem;
+      gap: 0.2rem;
+    }
+
+    .strength-icon :global(svg) {
+      width: 16px;
+      height: 16px;
     }
   }
 </style>
