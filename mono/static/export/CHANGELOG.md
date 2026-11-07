@@ -1,5 +1,63 @@
 ## Changelog
 
+### 2.13.20
+- Fix : Forge — calendar fits mid-size viewports, options bar stacks on phones
+  - The 7-column calendar grid becomes fluid under 960px instead of overflowing with a silent horizontal scroll (real-device report at 50% page zoom); compact cells with 44px day targets
+  - The options bar stacks into a clean full-width column under 720px (nav pair side by side, date/Size stretch, Offset and toggle as label/value rows) — verified live at 393px and 786px
+
+### 2.13.19
+- Fix : breadcrumb switcher menus visible again
+  - The Phase 0 `overflow: hidden` on the breadcrumb clipped the tool/doc switcher dropdowns entirely — the menus render again, with ellipsis on long names preserved
+
+### 2.13.18
+- Fix : audit — unreadable Excel files now surface a visible error
+  - Parse failures were swallowed internally (empty sheet list), leaving a ghost filename badge and a phantom "Sheet1" config; an unreadable .xlsx now clears the badge and shows an explicit "No readable sheets in this file." notification
+
+### 2.13.17
+- Fix : export — hide the zeroed stats card until a package is loaded
+  - The cryptic "0 QO (0) / 0 QCM (0)" card no longer renders in the empty state (gated on loaded items, like the Question Filtering section below it)
+
+### 2.13.16
+- Fix : 404 — two recovery paths, honest breadcrumb, announced to screen readers
+  - "Browse documentation" joins "Back to home" (deep-links to the tool's doc when the requested path was /docs/<tool>), and the requested path is displayed so URL typos are self-diagnosable
+  - The breadcrumb stops lying on error pages: unresolved segments render as muted text instead of links to further 404s
+  - Screen readers get an aria-live announcement and focus moves onto the error heading
+
+### 2.13.15
+- Fix : slides — no truncation on phones, honest touch hint, real dots hit area
+  - All 8 slides fit without overflow at 390×844 AND 360×640 (slides 5/7 were truncated by up to 257px, hidden by an invisible internal scroll): start-aligned scrollable container plus phone and short-phone densification tiers (pipeline cards, strengths grid, dataflow stack)
+  - Navigation dots keep a ≥24px invisible hit area; the keyboard/touch hint swaps on coarse pointers; reduced-motion disables the animations
+
+### 2.13.14
+- Fix : audit — primary flow reachable on mobile, honest failure states
+  - Empty-state copy no longer points "on the left" (which does not exist on mobile) and gains an "Open the side panel" CTA shown on phones only
+  - Upload inputs get format hints (ZIP / XLSX or XLS) and distinct accessible names; the disabled "Run audit" explains itself; a failed Excel parse clears the dangling filename badge
+
+### 2.13.13
+- Fix : import — export flow alive without a file, honest disabled states
+  - "Download Export" is disabled with an explanatory tooltip until a workbook + sheet are loaded (was clickable and silently did nothing)
+  - Source Combobox gains a "Select a file first" placeholder + accessible labels; template lock explains itself; accordion sections get aria-expanded/controls and the brand focus ring
+
+### 2.13.12
+- Fix : iat — CSV no longer silently ignored, UI chrome now translated
+  - Unsupported files (e.g. .csv) get an explicit rejection toast instead of a silent dead end; the input accepts .xlsx only
+  - i18n extended to the page chrome (eyebrow, subtitle, empty state, card title, legend, dropzone) in EN/FR/NL — the language switcher now changes the whole screen; upload CTA reachable on mobile
+
+### 2.13.11
+- Fix : format — upload CTA in the empty state, cleaner loaded sidebar
+  - The empty state carries a full FileInput (click + drag & drop) in the main content — on mobile the sidebar is a closed drawer and the upload was previously unreachable
+  - Centered empty state, deduplicated copy, labelled stem textarea, filename shown once (FileInput hides after load)
+
+### 2.13.10
+- Fix : editor — import CTA reachable on mobile, page fully French
+  - The empty state now carries a full FileInput (click + drag & drop) in the main content — the mobile drawer is no longer required to import
+  - A dedicated "Impossible de lire ce paquet" state replaces the misleading prompt shown after an invalid ZIP; title, eyebrow and dropzone labels are fully French via new FileInput props
+
+### 2.13.9
+- Fix : library — Open… keyboard-reachable, design-system empty state
+  - "Open…" is a real button driving a visually-hidden input (was an unfocusable label — keyboard users could not open a library at all)
+  - The empty Database tab uses the shared EmptyState instead of a bare card over dead space; uniform 44px mobile controls; disabled SQL buttons explain themselves
+
 ### 2.13.8
 - Fix : Documentation pages — single h1, no duplicated intro, synced `lang` (page template re-audited: 70/68 → 93/91)
   - Every doc file started with its own `# Title` + intro paragraph, duplicating the page hero (two h1, two nearly identical intros); the lead is now stripped at render, so the hero is the only h1 and the prose starts at the first section
